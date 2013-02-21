@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# first make sure we've got it all checked out
+git submodule init
+git submodule update
+
 # update all submodules
 git submodule foreach git pull origin master
 
