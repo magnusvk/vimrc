@@ -1,0 +1,51 @@
+[submodule "bundle/vim-coffee-script"]
+	path = vim-coffee-script
+	url = https://github.com/kchmck/vim-coffee-script.git
+[submodule "bundle/ZoomWin"]
+	path = ZoomWin
+	url = https://github.com/vim-scripts/ZoomWin.git
+[submodule "bundle/gitdiff.vim"]
+	path = gitdiff.vim
+	url = https://github.com/vim-scripts/gitdiff.vim.git
+[submodule "bundle/nerdtree"]
+	path = nerdtree
+	url = https://github.com/scrooloose/nerdtree.git
+[submodule "bundle/Gundo"]
+	path = Gundo
+	url = https://github.com/vim-scripts/Gundo.git
+[submodule "bundle/supertab"]
+	path = supertab
+	url = https://github.com/ervandew/supertab.git
+[submodule "bundle/syntastic"]
+	path = syntastic
+	url = https://github.com/scrooloose/syntastic.git
+[submodule "bundle/YankRing.vim"]
+	path = YankRing.vim
+	url = https://github.com/vim-scripts/YankRing.vim.git
+[submodule "bundle/ctrlp.vim"]
+	path = ctrlp.vim
+	url = https://github.com/kien/ctrlp.vim.git
+[submodule "bundle/mustache.vim"]
+	path = mustache.vim
+	url = https://github.com/juvenn/mustache.vim.git
+[submodule "bundle/nerdcommenter"]
+	path = nerdcommenter
+	url = https://github.com/scrooloose/nerdcommenter.git
+[submodule "bundle/vim-irblack"]
+	path = vim-irblack
+	url = https://github.com/wgibbs/vim-irblack.git
+[submodule "bundle/vim-ruby"]
+	path = vim-ruby
+	url = https://github.com/vim-ruby/vim-ruby.git
+[submodule "bundle/vim-rails"]
+	path = vim-rails
+	url = https://github.com/tpope/vim-rails.git
+[submodule "bundle/vim-surround"]
+	path = vim-surround
+	url = https://github.com/tpope/vim-surround.git
+[submodule "bundle/golden-ratio"]
+	path = golden-ratio
+	url = https://github.com/roman/golden-ratio.git
+[submodule "bundle/vim-less"]
+	path = vim-less
+	url = https://github.com/groenewege/vim-less.git
