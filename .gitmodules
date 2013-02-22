@@ -43,9 +43,6 @@
 [submodule "bundle/vim-surround"]
 	path = bundle/vim-surround
 	url = https://github.com/tpope/vim-surround.git
-[submodule "bundle/golden-ratio"]
-	path = bundle/golden-ratio
-	url = https://github.com/roman/golden-ratio.git
 [submodule "bundle/vim-less"]
 	path = bundle/vim-less
 	url = https://github.com/groenewege/vim-less.git
