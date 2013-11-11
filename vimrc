@@ -1,4 +1,4 @@
-" initializes the pathogen helper to manage plugions
+" initializes the pathogen helper to manage plugins
 call pathogen#infect()
 
 " turns on syntax highlighting
@@ -192,6 +192,9 @@ nnoremap <silent> <C-space> :YRShow<CR>
 
 " sync with system clipboard
 set clipboard=unnamed
+
+" highlight HamlC as we would Haml
+au BufRead,BufNewFile *.hamlc set ft=haml
 
 " change-paste mapping to replace a word with the clipboard's contents: cp{motion}
 nmap <silent> cp :set opfunc=ChangePaste<CR>g@
