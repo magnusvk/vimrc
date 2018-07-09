@@ -47,17 +47,30 @@ Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-fugitive'
 
 " color scheme
-Plug 'wgibbs/vim-irblack'
+Plug 'chriskempson/base16-vim'
 
 " Ruby and Rails support
 Plug 'tpope/vim-rails'
+Plug 'tpope/vim-bundle'
 Plug 'vim-ruby/vim-ruby'
 
 " easily change what a text is surrounded with
 Plug 'tpope/vim-surround'
+" Make vim-surround repeatable with .
+Plug 'tpope/vim-repeat'
 
 " syntax highlighting
 Plug 'kchmck/vim-coffee-script'
+
+" fancy status bar
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+
+" rename and delete files from vim
+Plug 'tpope/vim-eunuch'
+
+" quickly switch between one-line and multi-line code
+Plug 'AndrewRadev/splitjoin.vim'
 
 call plug#end()
 
@@ -68,11 +81,11 @@ call plug#end()
 syntax on
 
 " sets the color scheme
-set background=light
-:colorscheme ir_black
+colorscheme base16-default-dark
+let g:airline_theme='base16'
 
-" fix highlighting in Ag display
-hi QuickFixLine guifg=NONE guibg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
+" enable powerline symbols in airline
+let g:airline_powerline_fonts = 1
 
 " use (faster) ag for Ack
 let g:ackprg = 'ag --vimgrep --path-to-ignore ~/.ignore'
@@ -121,16 +134,12 @@ set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 
-" make it easy to deal with different indentation styles
-:nmap \t :set expandtab tabstop=4 shiftwidth=4 softtabstop=4<CR>
-:nmap \T :set expandtab tabstop=8 shiftwidth=8 softtabstop=4<CR>
-:nmap \M :set noexpandtab tabstop=8 softtabstop=4 shiftwidth=4<CR>
-:nmap \m :set expandtab tabstop=2 shiftwidth=2 softtabstop=2<CR>
-
 " ctrlp file finder plugin
 set wildmenu
-set wildmode=list:full,list:longest
+set wildmode=list:full
 set wildignore+=*.o,*.obj,.git,*.rbc,*.class,.svn,*/vendor/gems/*,*/node_modules/*,*/tmp/*,*/.tmp/*
+set wildignore+=*/public/paperclip/*
+set wildignore+=*/tmp/*
 " use fd which is faster
 let g:ctrlp_user_command = 'fd --type f --color=never "" %s'
 " make it possible to open the same file twice
@@ -140,14 +149,11 @@ let g:ctrlp_switch_buffer = 'et'
 let g:ctrlp_working_path_mode = 'a'
 " use better C-based matcher
 let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
+" keyboard shortcut
+let g:ctrlp_map = '<leader>t'
 
 " always show status line
 set laststatus=2
-
-" Without setting this, ZoomWin restores windows in a way that causes
-" equalalways behavior to be triggered the next time CommandT is used.
-" This is likely a bludgeon to solve some other issue, but it works
-set noequalalways
 
 " ZoomWin configuration
 map <Leader><Leader> :ZoomWin<CR>
@@ -161,9 +167,6 @@ endif
 " Thorfile, Rakefile, Vagrantfile and Gemfile are Ruby
 au BufRead,BufNewFile {Gemfile,Rakefile,Vagrantfile,Thorfile,config.ru}    set ft=ruby
 
-" md, markdown, and mk are markdown and define buffer-local preview
-au BufRead,BufNewFile *.{md,markdown,mdown,mkd,mkdn} call s:setupMarkup()
-
 " add json syntax highlighting
 au BufNewFile,BufRead *.json set ft=javascript
 
@@ -173,10 +176,6 @@ set backspace=indent,eol,start
 " load the plugin and indent settings for the detected filetype
 filetype plugin on
 filetype plugin indent on
-
-" Makefile-specific settings
-" This doesn't work well.
-"autocmd FileType make set noexpandtab shiftwidth=8 softtabstop=0
 
 " Make sure git commit messages always have the cursor on the first line
 autocmd FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
@@ -196,14 +195,6 @@ set directory=~/.vim/tmp
 
 " toggle comments
 map <leader>c <plug>NERDCommenterToggle<CR>
-
-" Tab configuration
-map <leader>bt :tabnew<cr>
-map <leader>be :tabedit
-map <leader>bc :tabclose<cr>
-map <leader>bm :tabmove
-map <leader>bn :tabn<cr>
-map <leader>bp :tabp<cr>
 
 " Zoom Zoom Zoom
 map <Leader><Leader> :ZoomWin<CR>
@@ -234,23 +225,6 @@ set showtabline=2
 " Don't show toolbar
 set guioptions-=T
 
-" configure ControlP
-let g:ctrlp_map = '<leader>t'
-let g:CommandTAcceptSelectionSplitMap='<C-s>'
-let g:CommandTAcceptSelectionVSplitMap='<C-CR>'
-set wildignore+=*/public/paperclip/*
-set wildignore+=*/tmp/*
-
-" add diffing unsaved changes
-function! s:DiffWithSaved()
-  let filetype=&ft
-  diffthis
-  vnew | r # | normal! 1Gdd
-  diffthis
-  exe "setlocal bt=nofile bh=wipe nobl noswf ro ft=" . filetype
-endfunction
-com! DiffSaved call s:DiffWithSaved()
-
 " disable scrollbars
 set guioptions-=r
 set guioptions-=l
@@ -273,14 +247,8 @@ function! ChangePaste(type, ...)
     silent exe "normal! p"
 endfunction
 
-" this will recompile my JS files and trigger a browser reload for me
-command Recompile call system('touch ~/code/bonobos/spree-frontend/src/application.coffee; touch ~/code/bonobos/ayr-frontend/src/application.coffee')
-
-" set up Ctags
-set tags=./tags,tags;
-
 " set fonts
-:set guifont=Monaco:h14
+:set guifont=Monaco\ for\ Powerline:h14
 
 " automatically strip trailing whitespace
 autocmd BufWritePre Gemfile,*.js,*.coffee,*.rb,*.rake,*.styl,*.json,*.erb,*.haml,*.sass,*.scss :%s/\s\+$//e
@@ -289,33 +257,9 @@ autocmd BufWritePre Gemfile,*.js,*.coffee,*.rb,*.rake,*.styl,*.json,*.erb,*.haml
 
 " highlight text that goes over eighty characters
 augroup vimrc_autocmds
-  autocmd BufEnter * highlight OverLength ctermbg=red ctermfg=white guibg=#592929
-  autocmd BufEnter * match OverLength /\%>80v.\+/
+  autocmd BufEnter *.rb,*.coffee,*.rake highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+  autocmd BufEnter *.rb,*.coffee,*.rake match OverLength /\%>80v.\+/
 augroup END
-
-function! DelTagOfFile(file)
-  let fullpath = a:file
-  let cwd = getcwd()
-  let tagfilename = cwd . "/tags"
-  let f = substitute(fullpath, cwd . "/", "", "")
-  let f = escape(f, './')
-  let cmd = 'sed -i "/' . f . '/d" "' . tagfilename . '"'
-  let resp = system(cmd)
-endfunction
- 
-function! UpdateTags()
-  let f = expand("%:p")
-  let cwd = getcwd()
-  let tagfilename = cwd . "/tags"
- 
-  if filereadable(tagfilename)
-    let cmd = 'ctags -a -f ' . tagfilename . ' "' . f . '"'
-    call DelTagOfFile(f)
-    let resp = system(cmd)
-  endif
-endfunction
- 
-autocmd BufWritePost * call UpdateTags()
 
 command Al cd ~/code/angelco
 cd ~/code/angelco
