@@ -1,2 +1,5 @@
-Session.vim
-tmp/*
+/Session.vim
+/session
+/tmp/*
+/autoload/plug.vim
+/plugged/*

@@ -1,26 +1,87 @@
-" initializes the pathogen helper to manage plugins
-call pathogen#infect()
+" ----------------------------------------------------------------------------
+"   Plug
+" ----------------------------------------------------------------------------
 
+" Install vim-plug if we don't already have it
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin('~/.vim/plugged')
+
+" parse ANSI color codes
+Plug 'vim-scripts/AnsiEsc.vim'
+
+" copy & paste history
+Plug 'vim-scripts/YankRing.vim'
+
+" zoom into current window
+Plug 'vim-scripts/ZoomWin'
+
+" full-text search
+Plug 'mileszs/ack.vim'
+
+" quick search through file names
+Plug 'ctrlpvim/ctrlp.vim'
+" smarter ctrl-p matching
+Plug 'JazzCore/ctrlp-cmatcher', { 'do': './install.sh' }
+
+" easily comment / uncomment blocks
+Plug 'scrooloose/nerdcommenter'
+
+" show files in tree
+Plug 'scrooloose/nerdtree'
+
+" auto-complete in insert mode
+Plug 'ervandew/supertab'
+
+" show syntax errors
+Plug 'scrooloose/syntastic'
+
+" automatically close blocks
+Plug 'tpope/vim-endwise'
+
+" Git integration
+Plug 'tpope/vim-fugitive'
+
+" color scheme
+Plug 'wgibbs/vim-irblack'
+
+" Ruby and Rails support
+Plug 'tpope/vim-rails'
+Plug 'vim-ruby/vim-ruby'
+
+" easily change what a text is surrounded with
+Plug 'tpope/vim-surround'
+
+" syntax highlighting
+Plug 'kchmck/vim-coffee-script'
+
+call plug#end()
+
+" ----------------------------------------------------------------------------
+"   Settings
+" ----------------------------------------------------------------------------
 " turns on syntax highlighting
 syntax on
 
-" sets auto-indet to on
-filetype plugin indent on
-
-" sets the ir_black color scheme
+" sets the color scheme
+set background=light
 :colorscheme ir_black
+
+" fix highlighting in Ag display
+hi QuickFixLine guifg=NONE guibg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
+
+" use (faster) ag for Ack
+let g:ackprg = 'ag --vimgrep --path-to-ignore ~/.ignore'
 
 " makes sure that Esc clears the highlights of the last search
 nnoremap <SPACE> :noh<CR>
 
 " enables search highlighting, incremental search and ignore case by default
-
-" enables search highlighting, incremental search and ignore case by default
 :set ignorecase smartcase incsearch hlsearch 
-
-" set a shortcut to open the BestVendor directory in NERDtree
-:command Bv cd ~/Programming/BestVendor/bestvendor_code
-:command Bvn :NERDTree ~/Programming/BestVendor/bestvendor_code
 
 " set a shortcut to open my .vimrc
 :command Vimrc :e ~/.vimrc
@@ -29,8 +90,8 @@ nnoremap <SPACE> :noh<CR>
 :nmap <C-e> :e#<CR>
 
 " commands for storing & retrieving session
-:command SessionStore :mksession! ~/.vim_session
-:command SessionRestore :source ~/.vim_session
+:command SessionStore :mksession! ~/.vim/session
+:command SessionRestore :source ~/.vim/session
 
 " set encoding
 set encoding=utf-8
@@ -66,10 +127,19 @@ set softtabstop=2
 :nmap \M :set noexpandtab tabstop=8 softtabstop=4 shiftwidth=4<CR>
 :nmap \m :set expandtab tabstop=2 shiftwidth=2 softtabstop=2<CR>
 
-" tab completion
+" ctrlp file finder plugin
 set wildmenu
-set wildmode=list:longest,list:full
-set wildignore+=*.o,*.obj,.git,*.rbc,*.class,.svn,vendor/gems/*
+set wildmode=list:full,list:longest
+set wildignore+=*.o,*.obj,.git,*.rbc,*.class,.svn,*/vendor/gems/*,*/node_modules/*,*/tmp/*,*/.tmp/*
+" use fd which is faster
+let g:ctrlp_user_command = 'fd --type f --color=never "" %s'
+" make it possible to open the same file twice
+let g:ctrlp_switch_buffer = 'et'
+" search in current working directory ('angelco') instead of current project
+" only
+let g:ctrlp_working_path_mode = 'a'
+" use better C-based matcher
+let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
 
 " always show status line
 set laststatus=2
@@ -81,10 +151,6 @@ set noequalalways
 
 " ZoomWin configuration
 map <Leader><Leader> :ZoomWin<CR>
-
-" graphical undo configuration
-nmap <F5> :GundoToggle<CR>
-imap <F5> <ESC>:GundoToggle<CR>
 
 " Remember last location in file
 if has("autocmd")
@@ -105,17 +171,21 @@ au BufNewFile,BufRead *.json set ft=javascript
 set backspace=indent,eol,start
 
 " load the plugin and indent settings for the detected filetype
+filetype plugin on
 filetype plugin indent on
+
+" Makefile-specific settings
+" This doesn't work well.
+"autocmd FileType make set noexpandtab shiftwidth=8 softtabstop=0
+
+" Make sure git commit messages always have the cursor on the first line
+autocmd FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
 
 " don't make annoying sounds
 set visualbell
 
 " longer history
 set history=1000
-
-" relative line numbers but not in insert mode
-autocmd InsertEnter * setl nu
-autocmd InsertLeave * setl rnu
 
 " Turn backup off, we don't want to clutter our directories
 set nobackup
@@ -203,8 +273,25 @@ function! ChangePaste(type, ...)
     silent exe "normal! p"
 endfunction
 
+" this will recompile my JS files and trigger a browser reload for me
+command Recompile call system('touch ~/code/bonobos/spree-frontend/src/application.coffee; touch ~/code/bonobos/ayr-frontend/src/application.coffee')
+
 " set up Ctags
 set tags=./tags,tags;
+
+" set fonts
+:set guifont=Monaco:h14
+
+" automatically strip trailing whitespace
+autocmd BufWritePre Gemfile,*.js,*.coffee,*.rb,*.rake,*.styl,*.json,*.erb,*.haml,*.sass,*.scss :%s/\s\+$//e
+" automatically strip trailing empty lines
+autocmd BufWritePre Gemfile,*.js,*.coffee,*.rb,*.rake,*.styl,*.json,*.erb,*.haml,*.sass,*.scss :%s/\($\n\s*\)\+\%$//e
+
+" highlight text that goes over eighty characters
+augroup vimrc_autocmds
+  autocmd BufEnter * highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+  autocmd BufEnter * match OverLength /\%>80v.\+/
+augroup END
 
 function! DelTagOfFile(file)
   let fullpath = a:file
@@ -229,3 +316,6 @@ function! UpdateTags()
 endfunction
  
 autocmd BufWritePost * call UpdateTags()
+
+command Al cd ~/code/angelco
+cd ~/code/angelco
